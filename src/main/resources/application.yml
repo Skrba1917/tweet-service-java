@@ -1,0 +1,8 @@
+spring:
+  data:
+    cassandra:
+      port: 9042
+      contact-points: mycassandra
+      keyspace-name: mykeyspace
+      entity-base-package: com.example.tweetservice.model
+      #schema-action: create_if_not_exists
