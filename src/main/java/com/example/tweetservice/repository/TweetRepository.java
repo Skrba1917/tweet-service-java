@@ -1,9 +1,14 @@
 package com.example.tweetservice.repository;
 
-import com.example.tweetservice.model.Tweet;
+import com.example.tweetservice.model.TweetByUser;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 
-public interface TweetRepository extends CassandraRepository<Tweet, Integer> {
+import java.util.List;
+import java.util.Optional;
+
+public interface TweetRepository extends CassandraRepository<TweetByUser, Integer> {
+
+    Optional<List<TweetByUser>> findByUserid(String userid);
 
 
 }
