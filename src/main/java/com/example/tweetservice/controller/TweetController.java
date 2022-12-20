@@ -1,6 +1,8 @@
 package com.example.tweetservice.controller;
 
+import com.example.tweetservice.model.LikeByTweet;
 import com.example.tweetservice.model.TweetByUser;
+import com.example.tweetservice.repository.LikeRepository;
 import com.example.tweetservice.repository.TweetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +18,12 @@ public class TweetController {
 
     @Autowired
     private TweetRepository tweetRepository;
+
+    @Autowired
+    private LikeRepository likeRepository;
+
+    // ------------------------------------------------------------------------------------------------------------- //
+    //                                            TWEET CONTROLLER                                                    //
 
     //Potrebno je izmeniti tako da prima korisnicko ime iz tokena
     @PostMapping("/tweets")
@@ -41,4 +49,20 @@ public class TweetController {
         List<TweetByUser> tweetsByUsers = tweetRepository.findByUserid(userid).orElse(null);
         return tweetsByUsers;
     }
+
+    // ------------------------------------------------------------------------------------------------------------- //
+    //                                            LIKE CONTROLLER                                                    //
+
+
+    @PostMapping("/likes")
+    public LikeByTweet addLike(@RequestBody LikeByTweet likeByTweet) {
+        LikeByTweet newLikeByTweet = new LikeByTweet();
+        newLikeByTweet.setLikeid(UUID.randomUUID());
+        newLikeByTweet.setTweetid(likeByTweet.getTweetid());
+        newLikeByTweet.setUserid(likeByTweet.getUserid());
+        newLikeByTweet.setActive(true);
+        likeRepository.save(newLikeByTweet);
+        return newLikeByTweet;
+    }
+
 }
