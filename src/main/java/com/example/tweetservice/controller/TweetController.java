@@ -5,6 +5,8 @@ import com.example.tweetservice.model.TweetByUser;
 import com.example.tweetservice.repository.LikeRepository;
 import com.example.tweetservice.repository.TweetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -55,14 +57,38 @@ public class TweetController {
 
 
     @PostMapping("/likes")
-    public LikeByTweet addLike(@RequestBody LikeByTweet likeByTweet) {
-        LikeByTweet newLikeByTweet = new LikeByTweet();
-        newLikeByTweet.setLikeid(UUID.randomUUID());
-        newLikeByTweet.setTweetid(likeByTweet.getTweetid());
-        newLikeByTweet.setUserid(likeByTweet.getUserid());
-        newLikeByTweet.setActive(true);
-        likeRepository.save(newLikeByTweet);
-        return newLikeByTweet;
+    public ResponseEntity addLike(@RequestBody LikeByTweet likeByTweet) {
+
+        System.out.println(likeByTweet.getUserid());
+        System.out.println(likeByTweet.getTweetid());
+
+        LikeByTweet mojlajk = likeRepository.findByUseridAndTweetid(likeByTweet.getUserid(),likeByTweet.getTweetid()).orElse(null);
+
+        if(mojlajk ==null){
+            LikeByTweet newLikeByTweet = new LikeByTweet();
+            newLikeByTweet.setLikeid(UUID.randomUUID());
+            newLikeByTweet.setTweetid(likeByTweet.getTweetid());
+            newLikeByTweet.setUserid(likeByTweet.getUserid());
+            newLikeByTweet.setActive(true);
+            likeRepository.save(newLikeByTweet);
+            return new ResponseEntity(newLikeByTweet, HttpStatus.CREATED);
+        }if (!mojlajk.isActive()){
+            mojlajk.setActive(true);
+            likeRepository.save(mojlajk);
+            return new ResponseEntity(mojlajk,HttpStatus.CREATED);
+        }
+        mojlajk.setActive(false);
+        likeRepository.save(mojlajk);
+        return new ResponseEntity(mojlajk,HttpStatus.CREATED);
+
+
+
+    }
+
+    @GetMapping("likes/{tweetid}")
+    public ResponseEntity findAllLikesForTweet(@PathVariable("tweetid") String tweetid){
+        List<LikeByTweet> allLikes= likeRepository.findByTweetid(UUID.fromString(tweetid)).orElse(null);
+        return new ResponseEntity(allLikes,HttpStatus.OK);
     }
 
 }
