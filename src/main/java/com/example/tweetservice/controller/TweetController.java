@@ -98,7 +98,9 @@ public class TweetController {
         List<LikeByTweet> allLikes= likeRepository.findByTweetid(UUID.fromString(tweetid)).orElse(null);
         List<String> allNames = new ArrayList<>();
         for(LikeByTweet onelike : allLikes){
-            allNames.add(onelike.getUserid());
+            if (onelike.isActive()) {
+                allNames.add(onelike.getUserid());
+            }
         }
         return new ResponseEntity(allNames,HttpStatus.OK);
     }
