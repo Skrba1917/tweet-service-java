@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -89,6 +90,17 @@ public class TweetController {
     public ResponseEntity findAllLikesForTweet(@PathVariable("tweetid") String tweetid){
         List<LikeByTweet> allLikes= likeRepository.findByTweetid(UUID.fromString(tweetid)).orElse(null);
         return new ResponseEntity(allLikes,HttpStatus.OK);
+    }
+
+
+    @GetMapping("likes/names/{tweetid}")
+    public ResponseEntity findAllUsersWhoLikedTweet(@PathVariable("tweetid") String tweetid){
+        List<LikeByTweet> allLikes= likeRepository.findByTweetid(UUID.fromString(tweetid)).orElse(null);
+        List<String> allNames = new ArrayList<>();
+        for(LikeByTweet onelike : allLikes){
+            allNames.add(onelike.getUserid());
+        }
+        return new ResponseEntity(allNames,HttpStatus.OK);
     }
 
 }
