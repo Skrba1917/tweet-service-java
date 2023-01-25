@@ -7,6 +7,8 @@ import com.example.tweetservice.repository.TweetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -30,12 +32,16 @@ public class TweetController {
 
     //Potrebno je izmeniti tako da prima korisnicko ime iz tokena
     @PostMapping("/tweets")
-    public TweetByUser addTweet(@RequestBody TweetByUser tweet){
+    public TweetByUser addTweet(Authentication auth, @RequestBody TweetByUser tweet){
+
+        UserDetails userDetails = (UserDetails)auth.getPrincipal();
+        String myusername = userDetails.getUsername();
+
         TweetByUser newTweet = new TweetByUser();
         newTweet.setTweetid(UUID.randomUUID());
         newTweet.setText(tweet.getText());
         newTweet.setCreatedtime(new Date());
-        newTweet.setUserid(tweet.getUserid());
+        newTweet.setUserid(myusername);
         tweetRepository.save(newTweet);
         return newTweet;
     }
