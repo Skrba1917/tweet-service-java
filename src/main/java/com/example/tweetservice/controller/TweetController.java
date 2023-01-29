@@ -1,16 +1,21 @@
 package com.example.tweetservice.controller;
 
+
 import com.example.tweetservice.model.LikeByTweet;
 import com.example.tweetservice.model.TweetByUser;
 import com.example.tweetservice.repository.LikeRepository;
 import com.example.tweetservice.repository.TweetRepository;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -31,21 +36,19 @@ public class TweetController {
     //                                            TWEET CONTROLLER                                                    //
 
     //Potrebno je izmeniti tako da prima korisnicko ime iz tokena
+    @PreAuthorize("hasAnyRole('ROLE_BusinessUser','ROLE_User')")
     @PostMapping("/tweets")
-    public TweetByUser addTweet(Authentication auth, @RequestBody TweetByUser tweet){
-
-        UserDetails userDetails = (UserDetails)auth.getPrincipal();
-        String myusername = userDetails.getUsername();
-
+    public TweetByUser addTweet(@Valid Authentication auth, @RequestBody TweetByUser tweet){
+    	UserDetails userDetails = (UserDetails)auth.getPrincipal();
+  	  	System.out.println(userDetails.getUsername());
         TweetByUser newTweet = new TweetByUser();
         newTweet.setTweetid(UUID.randomUUID());
         newTweet.setText(tweet.getText());
         newTweet.setCreatedtime(new Date());
-        newTweet.setUserid(myusername);
+        newTweet.setUserid(userDetails.getUsername());
         tweetRepository.save(newTweet);
         return newTweet;
     }
-
     @GetMapping("/tweets")
     public List<TweetByUser> getTweets(){
 
@@ -53,6 +56,7 @@ public class TweetController {
     }
 
     //Potrebno je izmeniti tako da prima korisnicko ime iz tokena
+    @PreAuthorize("hasAnyRole('ROLE_BusinessUser','ROLE_User')")
     @GetMapping("/tweetsByUser/{userid}")
     public List<TweetByUser> getTweetsFromOneUser(@PathVariable String userid){
         List<TweetByUser> tweetsByUsers = tweetRepository.findByUserid(userid).orElse(null);
@@ -62,7 +66,7 @@ public class TweetController {
     // ------------------------------------------------------------------------------------------------------------- //
     //                                            LIKE CONTROLLER                                                    //
 
-
+    @PreAuthorize("hasAnyRole('ROLE_BusinessUser','ROLE_User')")
     @PostMapping("/likes")
     public ResponseEntity addLike(@RequestBody LikeByTweet likeByTweet) {
 
@@ -92,6 +96,7 @@ public class TweetController {
 
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_BusinessUser','ROLE_User')")
     @GetMapping("likes/{tweetid}")
     public ResponseEntity findAllLikesForTweet(@PathVariable("tweetid") String tweetid){
         List<LikeByTweet> allLikes= likeRepository.findByTweetid(UUID.fromString(tweetid)).orElse(null);
@@ -99,6 +104,7 @@ public class TweetController {
     }
 
 
+    @PreAuthorize("hasAnyRole('ROLE_BusinessUser','ROLE_User')")
     @GetMapping("likes/names/{tweetid}")
     public ResponseEntity findAllUsersWhoLikedTweet(@PathVariable("tweetid") String tweetid){
         List<LikeByTweet> allLikes= likeRepository.findByTweetid(UUID.fromString(tweetid)).orElse(null);
@@ -111,4 +117,5 @@ public class TweetController {
         return new ResponseEntity(allNames,HttpStatus.OK);
     }
 
+  
 }
