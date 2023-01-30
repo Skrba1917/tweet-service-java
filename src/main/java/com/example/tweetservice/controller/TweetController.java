@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -41,13 +42,18 @@ public class TweetController {
     public TweetByUser addTweet(@Valid Authentication auth, @RequestBody TweetByUser tweet){
     	UserDetails userDetails = (UserDetails)auth.getPrincipal();
   	  	System.out.println(userDetails.getUsername());
-        TweetByUser newTweet = new TweetByUser();
-        newTweet.setTweetid(UUID.randomUUID());
-        newTweet.setText(tweet.getText());
-        newTweet.setCreatedtime(new Date());
-        newTweet.setUserid(userDetails.getUsername());
-        tweetRepository.save(newTweet);
-        return newTweet;
+            if(tweet.getText().contains(";")){
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN, " Tweet ne moze da sadrzi ;");
+            }else {
+                TweetByUser newTweet = new TweetByUser();
+                newTweet.setTweetid(UUID.randomUUID());
+                newTweet.setText(tweet.getText());
+                newTweet.setCreatedtime(new Date());
+                newTweet.setUserid(userDetails.getUsername());
+                tweetRepository.save(newTweet);
+                return newTweet;
+            }
     }
     @GetMapping("/tweets")
     public List<TweetByUser> getTweets(){
